@@ -1,0 +1,79 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #4A56FF;
+  --ifm-color-primary-dark: #3A46EF;
+  --ifm-color-primary-darker: #2A36DF;
+  --ifm-color-primary-darkest: #1A26CF;
+  --ifm-color-primary-light: #5A66FF;
+  --ifm-color-primary-lighter: #6A76FF;
+  --ifm-color-primary-lightest: #7A86FF;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(74, 86, 255, 0.1);
+  --ifm-background-color: #FAFEFF;
+  --ifm-color-success: #4ADDB6;
+  --ifm-color-info: #39BFF0;
+  --ifm-color-warning: #E8B931;
+  --ifm-color-danger: #EC221F;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #6A76FF;
+  --ifm-color-primary-dark: #5A66FF;
+  --ifm-color-primary-darker: #4A56FF;
+  --ifm-color-primary-darkest: #3A46EF;
+  --ifm-color-primary-light: #7A86FF;
+  --ifm-color-primary-lighter: #8A96FF;
+  --ifm-color-primary-lightest: #9AA6FF;
+  --docusaurus-highlighted-code-line-bg: rgba(106, 118, 255, 0.15);
+  --ifm-background-color: #1A1E3A;
+  --ifm-color-success: #4ADDB6;
+  --ifm-color-info: #39BFF0;
+  --ifm-color-warning: #E8B931;
+  --ifm-color-danger: #EC221F;
+}
+
+/* Custom KwickBit styling */
+.navbar__brand {
+  font-weight: 600;
+}
+
+.navbar__title {
+  font-weight: 600;
+  color: #21254E;
+}
+
+[data-theme='dark'] .navbar__title {
+  color: #E8E9F0;
+}
+
+/* Button styling to match KwickBit brand */
+.button--primary {
+  background-color: #4A56FF;
+  border-color: #4A56FF;
+}
+
+.button--primary:hover {
+  background-color: #3A46EF;
+  border-color: #3A46EF;
+}
+
+/* Code block styling */
+.prism-code {
+  border-radius: 8px;
+}
+
+/* Sidebar styling */
+.theme-doc-sidebar-container {
+  border-right: 1px solid #E3E3E3;
+}
+
+[data-theme='dark'] .theme-doc-sidebar-container {
+  border-right: 1px solid #2A2E4A;
+}

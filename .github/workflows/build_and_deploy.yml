@@ -1,0 +1,86 @@
+name: Deploy KwickBit node SDK
+run-name: Deploy KwickBit node SDK to ${{ github.event.inputs.environment }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  build-and-publish:
+    name: Build js bundle and publish it
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set UPPER_ENV variable
+        run: |
+          echo "ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          echo "UPPER_ENV=$(echo ${{ github.event.inputs.environment }} | tr '[:lower:]' '[:upper:]')" >> $GITHUB_ENV
+          echo "LOWER_ENV=$(echo '${{ github.event.inputs.environment }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set GCLOUD_PROJECT_ID_ENV variable
+        run: echo "GCLOUD_PROJECT_ID_ENV=GCLOUD_PROJECT_ID_${{ env.UPPER_ENV }}" >> $GITHUB_ENV
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Fetch GCLOUD_PROJECT_ID
+        id: fetch_project_id
+        uses: google-github-actions/get-secretmanager-secrets@v1
+        with:
+          secrets: |
+            GCLOUD_PROJECT_ID:${{ secrets.GCLOUD_INFRA_PROJECT_ID }}/${{ env.GCLOUD_PROJECT_ID_ENV }}/latest
+
+      - name: Export GCLOUD_PROJECT_ID
+        run: echo "GCLOUD_PROJECT_ID=${{ steps.fetch_project_id.outputs.GCLOUD_PROJECT_ID }}" >> $GITHUB_ENV
+
+      - name: Fetch secrets from Secret Manager
+        id: fetch_secrets
+        uses: google-github-actions/get-secretmanager-secrets@v1
+        with:
+          secrets: |
+            CLOUDFLARE_DOCUMENTATION_PROJECT:${{ env.GCLOUD_PROJECT_ID }}/CLOUDFLARE_DOCUMENTATION_PROJECT/latest
+
+      - name: Export secrets to env
+        run: |
+          echo "CLOUDFLARE_DOCUMENTATION_PROJECT=${{ steps.fetch_secrets.outputs.CLOUDFLARE_DOCUMENTATION_PROJECT }}" >> $GITHUB_ENV
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: true
+
+      - name: Build Docusaurus docs
+        working-directory: .
+        run: |
+          pnpm install
+          pnpm run build
+
+      - name: Upload Docusaurus docs to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          pnpm exec wrangler pages deploy \
+            ./build \
+            --project-name=${{ env.CLOUDFLARE_DOCUMENTATION_PROJECT }} \
+            --branch=main \
+            --commit-dirty
